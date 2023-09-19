@@ -5,7 +5,7 @@ Introduction:
 This project focuses on integrating the nrf52840dk board with the Irrometer 200SS Watermark Sensor using nrfconnect. While the current setup allows for some ADC readings, there seems to be an inconsistency in the values obtained. The readings from the ADC are fluctuating and do not stabilize. The provided code in the build directory serves as a foundation, but it requires further refinement, especially concerning the ADC, to achieve accurate results.
 
 Configuration:
-To define the GPIO pins for the nrf52840dk board, we utilize the eac_testpin.yaml file, which in turn modifies the nrf52840_dk_nrf52840.dts file.
+To define the GPIO pins for the nrf52840dk board, we utilize the eac_testpin.yaml file, which in turn modifies the nrf52840_dk_nrf52840.dts file. You can find this files in the extra_info_nrf82540dk folder
 
 Circuit Design:
 For a clear understanding of the circuit being used, refer to the images provided below:
