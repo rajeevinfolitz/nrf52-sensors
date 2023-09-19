@@ -1,0 +1,15 @@
+description: GPIO used as testpin
+
+compatible: "eac,testpin"
+
+include: base.yaml
+
+properties:
+  status:
+    required: true
+
+  gpios:
+    type: phandle-array
+    required: true
+    description: |
+      GPIO to use as testpin.
