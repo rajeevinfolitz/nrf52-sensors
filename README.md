@@ -26,3 +26,10 @@ Reference and Calibration:
 For calibration details, technical specifications, and other relevant information about the Irrometer 200SS Watermark Sensor, please refer to the link below.
 
 https://www.irrometer.com/200ss.html
+
+
+
+Software Version:
+nRFConnect v4.2.0
+Programmer v3.0.9
+Toolchain Manager v1.2.5
