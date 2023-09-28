@@ -28,6 +28,9 @@
 
 
 /*******************************MACROS****************************************/
+
+#define VER     (0.0.1)
+#define INFO    ("Updated with notification support with increased MTU Size.")
 #define INFOLITZ_EDIT //Comment this line to disable our changes
 //#define SLEEP_ENABLE  //Uncomment this line to enable sleep functionality
 #define ADC_MAX_VALUE 1023
@@ -240,22 +243,26 @@ int main(void)
             unPressureResult = ((unPressureRaw-pressureZero)*pressuretransducermaxPSI)/(pressureMax-pressureZero);
             sprintf(cbuffer,"pr=%dpsi", unPressureResult);
             printk("Data:%s\n", cbuffer);
-            pucAdvertisingdata[2] = 0x01;
-            pucAdvertisingdata[3] = (uint8_t)strlen(cbuffer);
             AddItemtoJsonObject(&pMainObject, "data", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));
             strcpy(cJsonBuffer, (char *)cJSON_Print(pMainObject));
+            pucAdvertisingdata[2] = 0x01;
+            pucAdvertisingdata[3] = (uint8_t)strlen(cJsonBuffer);
             memcpy(&pucAdvertisingdata[4], cJsonBuffer, strlen(cJsonBuffer));
             printk("JSON:\n%s\n", cJsonBuffer);
         } 
 
         if(IsNotificationenabled())
         {
-            VisenseSensordataNotify(pucAdvertisingdata+2, 15);
+           VisenseSensordataNotify(pucAdvertisingdata+2, ADV_BUFF_SIZE);
         }
-        else
+        else if (!IsNotificationenabled() && !IsConnected())
         {
             UpdateAdvertiseData();
             StartAdvertising();
+        }
+        else
+        {
+            //NO OP
         }
         
         memset(pucAdvertisingdata, 0, ADV_BUFF_SIZE);

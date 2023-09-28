@@ -24,6 +24,7 @@ static struct bt_uuid_128 sSensorChara = BT_UUID_INIT_128(
 
 static uint8_t ucSensorData[VND_MAX_LEN + 1] = {0x11,0x22,0x33, 0x44, 0x55};
 static bool bNotificationEnabled = false; 
+static bool bConnected = false;
 struct bt_conn *psConnHandle = NULL;
 
 /****************************FUNCTION DEFINITION********************************/
@@ -111,12 +112,15 @@ static void connected(struct bt_conn *conn, uint8_t err)
 	} 
     else 
     {
+		bt_conn_le_data_len_update(conn, BT_LE_DATA_LEN_PARAM_MAX);
+		bConnected = true;
 		printk("Connected\n");
 	}
 }
 
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
+	bConnected = false;
 	printk("Disconnected (reason 0x%02x)\n", reason);
 }
 
@@ -152,4 +156,14 @@ int VisenseSensordataNotify(uint8_t *pucSensorData, uint16_t unLen)
 bool IsNotificationenabled()
 {
     return bNotificationEnabled;
+}
+
+/**
+ * @brief Check if the device connected
+ * @param None
+ * @return returns the device is connected or not
+*/
+bool IsConnected()
+{
+	return bConnected;
 }
