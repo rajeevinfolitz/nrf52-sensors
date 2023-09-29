@@ -29,6 +29,7 @@ struct bt_conn *psConnHandle = NULL;
 
 /****************************FUNCTION DEFINITION********************************/
 
+
 /**
  * @brief Charcteristics Read callback
  * @param bt_conn - Connection handle
@@ -106,6 +107,7 @@ BT_GATT_SERVICE_DEFINE(VisenseService,
 
 static void connected(struct bt_conn *conn, uint8_t err)
 {
+
 	if (err) 
     {
 		printk("Connection failed (err 0x%02x)\n", err);
