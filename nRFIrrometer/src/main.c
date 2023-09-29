@@ -30,18 +30,20 @@
 #include "Json/cJSON.h"
 #include "BleHandler.h"
 #include "BleService.h"
+#include "JsonHandler.h"
 
 /*******************************MACROS****************************************/
-#define SLEEP_ENABLE  //Uncomment this line to enable sleep functionality
+//#define SLEEP_ENABLE  //Uncomment this line to enable sleep functionality
 /*******************************GLOBAL VARIABLES********************************/
+nrf_saadc_value_t  sAdcReadValue1 = 0;
+nrf_saadc_value_t  sAdcReadValue2 = 0;
 const int Rx = 10000;
 const float default_TempC = 24.0;
 const long open_resistance = 35000;
 const long short_resistance = 200;
 const long short_CB = 240, open_CB = 255;
 const float SupplyV = 3.3;
-volatile nrf_saadc_value_t  sAdcReadValue1 = 0;
-volatile nrf_saadc_value_t  sAdcReadValue2 = 0;
+
 
 cJSON *pcData = NULL;
 const struct device *pAdc = NULL;
@@ -61,6 +63,7 @@ const struct gpio_dt_spec sSleepStatusLED = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpi
 */
 float AnalogRead(void)
 {
+
     nrfx_err_t status;
     nrf_saadc_value_t sample_value;
 
@@ -69,13 +72,12 @@ float AnalogRead(void)
     
     status = nrfx_saadc_mode_trigger();
     NRFX_ASSERT(status == NRFX_SUCCESS);
-
-    return (float)sample_value / 1023 * SupplyV;
+    return sample_value;
 }
 
 int GetAdcResult( const struct gpio_dt_spec *excite_pin_spec)
 {
-
+    int16_t AdcReadValue ;
     if (!device_is_ready(excite_pin_spec->port)) {
         printk("Error: %s device not ready\n", excite_pin_spec->port->name);
         return -1;
@@ -83,12 +85,13 @@ int GetAdcResult( const struct gpio_dt_spec *excite_pin_spec)
     gpio_pin_set(excite_pin_spec->port, excite_pin_spec->pin, 1);
     k_sleep(K_USEC(90)); 
 
-    float fVoltGet = AnalogRead();
+    AdcReadValue = AnalogRead();
 
     gpio_pin_set(excite_pin_spec->port, excite_pin_spec->pin, 0);
     k_sleep(K_MSEC(100)); 
 
-    return (int)(fVoltGet / SupplyV) * 1023;
+    
+    return AdcReadValue;
 }
 
 int myCBvalue(int res, float TC, float cF)
@@ -198,39 +201,7 @@ static void InitAdc(void)
  * @param ucLen - value length
  * @return true or false
 */
-bool AddItemtoJsonObject(cJSON **pcJsonHandle, const char *pcKey, 
-                    uint8_t *pcValue, uint8_t ucLen)
-{
-    uint8_t ucIndex = 0;
-    bool bRetVal = false;
 
-    if (*pcJsonHandle && pcKey && pcValue)
-    {
-        if (strcmp(pcKey,"data") == 0)
-        {
-            pcData = cJSON_AddArrayToObject(*pcJsonHandle, "data");
-
-            if (pcData)
-            {
-                for (ucIndex = 0; ucIndex < ucLen; ucIndex++)
-                {
-                    cJSON_AddItemToArray(pcData, cJSON_CreateNumber(pcValue[ucIndex]));
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            cJSON_AddNumberToObject(*pcJsonHandle, pcKey, *pcValue);
-        }
-        bRetVal = true;
-    }
-    
-    return bRetVal;
-}
 static bool SetPMState()
 {
     bool bRetVal = false;
@@ -314,11 +285,14 @@ int main(void)
         int WM1_CB = myCBvalue((int)WM_Resistance, default_TempC, cFactor);
         printk("WM1(cb/kPa): %d\n", abs(WM1_CB));
 
-        sprintf(cbuffer,"CB= %d", abs(WM1_CB));
+        sprintf(cbuffer,"CB=%d", abs(WM1_CB));
         printk("Data:%s\n", cbuffer);
         
         
-        AddItemtoJsonObject(&pMainObject, "data", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));
+        // AddItemtoJsonObject(&pMainObject, "data", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));
+        AddItemtoJsonObject(&pMainObject, NUMBER, "ADCValue1", &sAdcReadValue1, sizeof(uint16_t));
+        AddItemtoJsonObject(&pMainObject, NUMBER, "ADCValue2", &sAdcReadValue2, sizeof(uint16_t));
+        AddItemtoJsonObject(&pMainObject, STRING, "CBValue", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));
         strcpy(cJsonBuffer, (char *)cJSON_Print(pMainObject));
         
         memset(cbuffer,0 , sizeof(cbuffer));
