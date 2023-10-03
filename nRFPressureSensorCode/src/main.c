@@ -41,9 +41,9 @@
     const int pressureMax = 929; //analog reading of pressure transducer at 100psi
     const int pressureZero = 110; //analog reading of pressure transducer at 0psi
 #else
-    const int pressureZero = 150; //analog reading of pressure transducer at 0psi
+    static uint32_t pressureZero = 150; //analog reading of pressure transducer at 0psi
                               //PressureZero = 0.5/3.3V*1024~150(supply voltage - 3.3v) taken from Arduino code refernce from visense 
-    const int pressureMax = 775; //analog reading of pressure transducer at 100psi
+    static uint32_t pressureMax = 775; //analog reading of pressure transducer at 100psi
                              //PressureMax = 2.5/3.3V*1024~775  taken from Arduino code refernce from visense       
 #endif
 
@@ -51,7 +51,8 @@ const int pressuretransducermaxPSI = 70; //psi value of transducer being used
 cJSON *pcData = NULL;
 const struct device *pAdc = NULL;
 const struct gpio_dt_spec sSleepStatusLED = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
-
+void setPressureZero(uint32_t ucbuff);
+void setPressureMax(uint32_t ucbuff);
 /*******************************FUNCTION DEFINITIONS********************************/
 
 /**
@@ -70,6 +71,24 @@ uint16_t AnalogRead(void)
     NRFX_ASSERT(status == NRFX_SUCCESS);
 
     return sample_value;
+}
+/**
+ * @brief Setting pressureZero
+ * @param ucbuffer - buffer for setting pressureZero
+ * @return void
+*/
+void SetPressureZero(uint32_t ucbuffer)
+{
+    pressureZero = ucbuffer;
+}
+/**
+ * @brief Setting pressureMax
+ * @param ucbuffer - buffer for setting pressureMax
+ * @return void
+*/
+void SetPressureMax(uint8_t ucbuffer)
+{
+    pressureMax = ucbuffer;
 }
 
 /*
@@ -204,6 +223,7 @@ int main(void)
         {
             memset(cbuffer, '\0',sizeof(cbuffer));
             unPressureResult = ((unPressureRaw-pressureZero)*pressuretransducermaxPSI)/(pressureMax-pressureZero);
+            
             sprintf(cbuffer,"%dpsi", unPressureResult);
             printk("Data:%s\n", cbuffer);
             AddItemtoJsonObject(&pMainObject, STRING, "CurrPressure", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));
@@ -238,7 +258,8 @@ int main(void)
 
         cJSON_Delete(pMainObject);
         k_sleep(K_MSEC(1000));
-        
+        printk("PressureZero: %d\n", pressureZero);
+        printk("PressureMax: %d\n", pressureMax);
         #ifdef SLEEP_ENABLE
          EnterSleepMode(180);
          ExitSleepMode();
