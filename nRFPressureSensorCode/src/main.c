@@ -219,6 +219,8 @@ int main(void)
         printk("ADCRaw: %d\n", unPressureRaw);
         pMainObject = cJSON_CreateObject();
         AddItemtoJsonObject(&pMainObject, NUMBER, "ADCValue", &unPressureRaw, sizeof(uint16_t));
+        AddItemtoJsonObject(&pMainObject, NUMBER, "PressureZero", &pressureZero, sizeof(uint32_t));
+        AddItemtoJsonObject(&pMainObject, NUMBER, "PressureMax", &pressureMax, sizeof(uint32_t));
         if (unPressureRaw > pressureZero && unPressureRaw < ADC_MAX_VALUE)
         {
             memset(cbuffer, '\0',sizeof(cbuffer));
