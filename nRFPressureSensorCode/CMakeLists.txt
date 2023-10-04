@@ -16,6 +16,7 @@ project(nrfx_example)
 
 target_sources(app PRIVATE src/main.c 
                            src/Json/cJSON.c
+                           src/Json/Jsonhandler.c
                            src/BLE/BleHandler.c
 						   src/BLE/BleService.c
                            "C:/ncs/v2.4.2/modules/hal/nordic/nrfx/samples/src/nrfx_saadc/common/saadc_examples_common.c")
