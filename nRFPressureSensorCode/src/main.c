@@ -25,6 +25,7 @@
 #include "BleHandler.h"
 #include "BleService.h"
 #include "JsonHandler.h"
+#include "RtcHandler.h"
 
 
 /*******************************MACROS****************************************/
@@ -183,10 +184,14 @@ int main(void)
     uint16_t unPressureResult =0;
     uint16_t unPressureRaw = 0;
     char cbuffer[30] = {0};
+    char CTimebuffer[128] = {0};
     char cJsonBuffer[100] = {0};
     uint8_t *pucAdvertisingdata = NULL;
     cJSON *pMainObject = NULL;
 
+
+    
+    RtcInit();
     SetPMState();
     pucAdvertisingdata = GetAdvertisingBuffer();
     InitADC();
@@ -211,6 +216,10 @@ int main(void)
 
     while (1) 
     {
+        if (GetCurrentTime(CTimebuffer))
+        {
+            printk("CurrentTime=%s\n\r", CTimebuffer);
+        }
         unPressureRaw = AnalogRead();
         if (unPressureRaw > ADC_MAX_VALUE)
         {
@@ -259,7 +268,7 @@ int main(void)
         memset(pucAdvertisingdata, 0, ADV_BUFF_SIZE);
 
         cJSON_Delete(pMainObject);
-        k_sleep(K_MSEC(1000));
+        k_sleep(K_MSEC(5));
         printk("PressureZero: %d\n", pressureZero);
         printk("PressureMax: %d\n", pressureMax);
         #ifdef SLEEP_ENABLE

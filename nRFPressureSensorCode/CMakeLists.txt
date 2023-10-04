@@ -19,7 +19,9 @@ target_sources(app PRIVATE src/main.c
                            src/Json/Jsonhandler.c
                            src/BLE/BleHandler.c
 						   src/BLE/BleService.c
+                           src/RTC/RtcHandler.c
                            "C:/ncs/v2.4.2/modules/hal/nordic/nrfx/samples/src/nrfx_saadc/common/saadc_examples_common.c")
 target_include_directories(app PRIVATE src/Json 
                                        src/BLE
+                                       src/RTC
                                        ${COMMON_PATH} "C:/ncs/v2.4.2/modules/hal/nordic/nrfx/samples/src/nrfx_saadc/common")
