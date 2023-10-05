@@ -41,9 +41,9 @@
     const int pressureMax = 929; //analog reading of pressure transducer at 100psi
     const int pressureZero = 110; //analog reading of pressure transducer at 0psi
 #else
-    static uint32_t pressureZero = 150; //analog reading of pressure transducer at 0psi
+    static uint32_t pressureZero = 115; //analog reading of pressure transducer at 0psi
                               //PressureZero = 0.5/3.3V*1024~150(supply voltage - 3.3v) taken from Arduino code refernce from visense 
-    static uint32_t pressureMax = 775; //analog reading of pressure transducer at 100psi
+    static uint32_t pressureMax = 564; //analog reading of pressure transducer at 100psi
                              //PressureMax = 2.5/3.3V*1024~775  taken from Arduino code refernce from visense       
 #endif
 
