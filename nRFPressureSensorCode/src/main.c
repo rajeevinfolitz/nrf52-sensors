@@ -42,9 +42,9 @@
     const int pressureMax = 929; //analog reading of pressure transducer at 100psi
     const int pressureZero = 110; //analog reading of pressure transducer at 0psi
 #else
-    static uint32_t pressureZero = 150; //analog reading of pressure transducer at 0psi
+    static uint32_t pressureZero = 115; //analog reading of pressure transducer at 0psi
                               //PressureZero = 0.5/3.3V*1024~150(supply voltage - 3.3v) taken from Arduino code refernce from visense 
-    static uint32_t pressureMax = 775; //analog reading of pressure transducer at 100psi
+    static uint32_t pressureMax = 564; //analog reading of pressure transducer at 100psi
                              //PressureMax = 2.5/3.3V*1024~775  taken from Arduino code refernce from visense       
 #endif
 
@@ -182,20 +182,20 @@ int main(void)
 {
     int nError;
     uint16_t unPressureResult =0;
-    uint16_t unPressureRaw = 0;
+    uint32_t unPressureRaw = 0;
     char cbuffer[30] = {0};
-    char CTimebuffer[128] = {0};
-    char cJsonBuffer[100] = {0};
+    char cJsonBuffer[150] = {0};
     uint8_t *pucAdvertisingdata = NULL;
     cJSON *pMainObject = NULL;
+    long long llEpochNow = 0;
 
 
     
-    RtcInit();
+    InitRtc();
     SetPMState();
     pucAdvertisingdata = GetAdvertisingBuffer();
     InitADC();
-    k_sleep(K_MSEC(100));
+    k_sleep(K_TICKS(100));
     pAdc = device_get_binding("arduino_adc");
 
     if (!EnableBLE())
@@ -216,9 +216,9 @@ int main(void)
 
     while (1) 
     {
-        if (GetCurrentTime(CTimebuffer))
+        if (GetCurrenTimeInEpoch(&llEpochNow))
         {
-            printk("CurrentTime=%s\n\r", CTimebuffer);
+            printk("CurrentTime=%llu\n\r", llEpochNow);
         }
         unPressureRaw = AnalogRead();
         if (unPressureRaw > ADC_MAX_VALUE)
@@ -227,9 +227,10 @@ int main(void)
         }
         printk("ADCRaw: %d\n", unPressureRaw);
         pMainObject = cJSON_CreateObject();
-        AddItemtoJsonObject(&pMainObject, NUMBER, "ADCValue", &unPressureRaw, sizeof(uint16_t));
+        AddItemtoJsonObject(&pMainObject, NUMBER, "ADCValue", &unPressureRaw, sizeof(uint32_t));
         AddItemtoJsonObject(&pMainObject, NUMBER, "PressureZero", &pressureZero, sizeof(uint32_t));
         AddItemtoJsonObject(&pMainObject, NUMBER, "PressureMax", &pressureMax, sizeof(uint32_t));
+        AddItemtoJsonObject(&pMainObject, NUMBER, "TimeStamp", &llEpochNow, sizeof(long long));
         if (unPressureRaw > pressureZero && unPressureRaw < ADC_MAX_VALUE)
         {
             memset(cbuffer, '\0',sizeof(cbuffer));
@@ -237,12 +238,12 @@ int main(void)
             
             sprintf(cbuffer,"%dpsi", unPressureResult);
             printk("Data:%s\n", cbuffer);
-            AddItemtoJsonObject(&pMainObject, STRING, "CurrPressure", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));
+            AddItemtoJsonObject(&pMainObject, STRING, "Pressure", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));
 
         }
         else
         {
-             AddItemtoJsonObject(&pMainObject, STRING, "PrevPressure", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));   
+            // No Op   
         }
 
         strcpy(cJsonBuffer, (char *)cJSON_Print(pMainObject));
@@ -268,7 +269,7 @@ int main(void)
         memset(pucAdvertisingdata, 0, ADV_BUFF_SIZE);
 
         cJSON_Delete(pMainObject);
-        k_sleep(K_MSEC(5));
+        k_sleep(K_MSEC(1000));
         printk("PressureZero: %d\n", pressureZero);
         printk("PressureMax: %d\n", pressureMax);
         #ifdef SLEEP_ENABLE

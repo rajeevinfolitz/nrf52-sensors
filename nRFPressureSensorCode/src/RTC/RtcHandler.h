@@ -10,11 +10,13 @@
 #define _RTC_HANDLER_H
 
 /***************************************INCLUDES*********************************/
+#include <time.h>
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
-#include <zephyr/drivers/counter.h>
-#include <zephyr/sys/printk.h>
-#include <zephyr/drivers/rtc/maxim_ds3231.h>
+#include <zephyr/drivers/i2c.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/devicetree.h>
+// #include <zephyr/drivers/rtc/maxim_ds3231.h>
 
 /***************************************MACROS**********************************/
 
@@ -24,7 +26,7 @@
 
 
 /***************************************FUNCTION DECLARTAION*********************/
-bool RtcInit();
-bool GetCurrentTime(char *cCurrTime);
+bool InitRtc();
+bool GetCurrenTimeInEpoch(long long *pllCurrEpoch);
 
 #endif

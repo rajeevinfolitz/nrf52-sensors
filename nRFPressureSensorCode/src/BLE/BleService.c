@@ -141,7 +141,6 @@ static void connected(struct bt_conn *conn, uint8_t err)
     {
 		bt_conn_le_data_len_update(conn, BT_LE_DATA_LEN_PARAM_MAX);
 		bConnected = true;
-		printk("Connected\n");
 	}
 }
 
