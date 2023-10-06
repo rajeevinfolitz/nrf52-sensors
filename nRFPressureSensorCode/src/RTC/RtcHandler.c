@@ -23,23 +23,38 @@ static long long llLastUpdatedTime = 1696585221;
 
 /***************************************FUNCTION DEFINITIONS********************/
 
+/**
+ * @brief Converting number format from BCD to Decimal
+ * @param to_convert : number to convert
+ * @return Decimal number
+*/
 static int ConvertBCDToDecimal(int to_convert)
 {
    return (to_convert >> 4) * 10 + (to_convert & 0x0F);
 }
 
+/**
+ * @brief Converting number format from Decimal to BCD
+ * @param to_convert : number to convert
+ * @return BCD number
+*/
 static int ConvertDecimalToBCD(int to_convert)
 {
    return ((to_convert / 10) << 4) + (to_convert % 10);
 }
 
-
+/**
+ * @brief Convert epoch time to readable format
+ * @param llTimeStamp : Epoch time
+ * @param psTimeStruct : time structure to store time info 
+ * @param pcBuffer : time in string format
+ * @return true for success
+*/
 static bool ConvertEpochToTime(long long llTimeStamp, struct tm *psTimeStruct, char *pcBuffer)
 {
-   //  time_t rawtime = 1696585221;
-     //1696585221
     struct tm  ts = {0};
     char       buf[MAX_TIME_BUFF_SIZE] = {0};
+	bool bRetVal = false;
 
 
 	if (psTimeStruct && pcBuffer)
@@ -55,9 +70,17 @@ static bool ConvertEpochToTime(long long llTimeStamp, struct tm *psTimeStruct, c
 		strftime(buf, sizeof(buf), "%a %Y-%m-%d %H:%M:%S %Z", &ts);
 		strcpy(pcBuffer, buf);
 		memcpy(psTimeStruct, &ts, sizeof(ts));
+		bRetVal = true;
 	}
+
+	return bRetVal;
 }
 
+/**
+ * @brief Setting time and date of RTC
+ * @param None
+ * @return true for success
+*/
 static bool SetTimeDate()
 {
 	bool bRetVal = false;
@@ -108,7 +131,7 @@ static bool SetTimeDate()
         if (i2c_reg_write_byte(i2c_dev, RTC_DEV_ADDR, 
 									ucReg, ConvertDecimalToBCD(sTimeDate.tm_mday)) != 0)
         {
-            printk("writing Day failed\n\r");
+            printk("writing Date failed\n\r");
             break;
         }
 
@@ -118,7 +141,7 @@ static bool SetTimeDate()
         if (i2c_reg_write_byte(i2c_dev, RTC_DEV_ADDR, 
 									ucReg, ConvertDecimalToBCD(sTimeDate.tm_mon)) != 0)
         {
-            printk("writing Day failed\n\r");
+            printk("writing month failed\n\r");
             break;
         }
 
@@ -127,15 +150,22 @@ static bool SetTimeDate()
          if (i2c_reg_write_byte(i2c_dev, RTC_DEV_ADDR, 
 		 							ucReg, ConvertDecimalToBCD((sTimeDate.tm_year+1900)-2000)) != 0)
         {
-            printk("writing Day failed\n\r");
+            printk("writing year failed\n\r");
             break;
         }
+
+		bRetVal = true;
 
     } while (0);
 
 	return bRetVal;
 }
 
+/**
+ * @brief Initialise RTC
+ * @param None
+ * @return true for success
+*/
 bool InitRtc()
 {
     bool bRetVal = false;
@@ -155,7 +185,11 @@ bool InitRtc()
     return bRetVal;
 }
 
-
+/**
+ * @brief Get time in epoch format
+ * @param pllCurrEpoch : Epoch time 
+ * @return true for success
+*/
 bool GetCurrenTimeInEpoch(long long *pllCurrEpoch)
 {
 	struct tm sTimeStamp = {0};
@@ -180,7 +214,7 @@ bool GetCurrenTimeInEpoch(long long *pllCurrEpoch)
 
 			if (0 != i2c_reg_read_byte(i2c_dev, RTC_DEV_ADDR, ucReg, &ucData))
 			{
-				printk("Reading seconds failed\n\r");
+				printk("Reading minutes failed\n\r");
 				break;
 			}
 			
@@ -190,7 +224,7 @@ bool GetCurrenTimeInEpoch(long long *pllCurrEpoch)
 
 			if (0 != i2c_reg_read_byte(i2c_dev, RTC_DEV_ADDR, ucReg, &ucData))
 			{
-				printk("Reading seconds failed\n\r");
+				printk("Reading hour failed\n\r");
 				break;
 			}
 			
@@ -200,7 +234,7 @@ bool GetCurrenTimeInEpoch(long long *pllCurrEpoch)
 
 			if (0 != i2c_reg_read_byte(i2c_dev, RTC_DEV_ADDR, ucReg, &ucData))
 			{
-				printk("Reading seconds failed\n\r");
+				printk("Reading day failed\n\r");
 				break;
 			}
 			
@@ -210,7 +244,7 @@ bool GetCurrenTimeInEpoch(long long *pllCurrEpoch)
 
 			if (0 != i2c_reg_read_byte(i2c_dev, RTC_DEV_ADDR, ucReg, &ucData))
 			{
-				printk("Reading seconds failed\n\r");
+				printk("Reading date failed\n\r");
 				break;
 			}
 			
@@ -220,7 +254,7 @@ bool GetCurrenTimeInEpoch(long long *pllCurrEpoch)
 
 			if (0 != i2c_reg_read_byte(i2c_dev, RTC_DEV_ADDR, ucReg, &ucData))
 			{
-				printk("Reading seconds failed\n\r");
+				printk("Reading month failed\n\r");
 				break;
 			}
 			
@@ -230,7 +264,7 @@ bool GetCurrenTimeInEpoch(long long *pllCurrEpoch)
 
 			if (0 != i2c_reg_read_byte(i2c_dev, RTC_DEV_ADDR, ucReg, &ucData))
 			{
-				printk("Reading seconds failed\n\r");
+				printk("Reading year failed\n\r");
 				break;
 			}
 			
