@@ -228,12 +228,12 @@ int main(void)
             
             sprintf(cbuffer,"%dpsi", unPressureResult);
             printk("Data:%s\n", cbuffer);
-            AddItemtoJsonObject(&pMainObject, STRING, "CurrPressure", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));
+            AddItemtoJsonObject(&pMainObject, STRING, "Pressure", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));
 
         }
         else
         {
-             AddItemtoJsonObject(&pMainObject, STRING, "PrevPressure", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));   
+            // AddItemtoJsonObject(&pMainObject, STRING, "PrevPressure", (uint8_t*)cbuffer, (uint8_t)strlen(cbuffer));   
         }
 
         strcpy(cJsonBuffer, (char *)cJSON_Print(pMainObject));
